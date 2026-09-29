@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="vi" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RateSmart - Nền Tảng Dữ Liệu Giá & Định Giá Tự Động Hàng Đầu Việt Nam</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#008037', // Primary brand color from slide
+              800: '#00662c',
+              900: '#004d21',
+            },
+            dark: {
+              900: '#0b1320',
+              800: '#111e33',
+              700: '#1e293b',
+              600: '#334155'
+            }
+          },
+          fontFamily: {
+            heading: ['"Plus Jakarta Sans"', 'sans-serif'],
+            sans: ['"Inter"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, h2, h3, h4, h5, h6, .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass-card { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); }
+    .badge-star { background: linear-gradient(135deg, #008037 0%, #10b981 100%); }
+    .tab-active { border-bottom: 3px solid #008037; color: #008037; font-weight: 700; }
+    #map { height: 520px; width: 100%; border-radius: 12px; z-index: 10; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-100 selection:text-brand-900">
+
+  <!-- TOP PROTOTYPE SWITCHER BAR -->
+  <div class="sticky top-0 z-50 bg-slate-900 text-white px-4 py-2 text-xs flex flex-wrap items-center justify-between border-b border-slate-800 shadow-md">
+    <div class="flex items-center space-x-3">
+      <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-brand-700/80 text-white font-medium">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        AI Prototype Design V1.0
+      </span>
+      <span class="text-slate-400 hidden sm:inline">Dự án Website RateSmart (Thành viên Lotus VFI)</span>
+    </div>
+
+    <!-- View Modes Switcher -->
+    <div class="flex items-center space-x-1 bg-slate-800 p-1 rounded-lg">
+      <button onclick="switchView('frontend')" id="btn-view-frontend" class="px-3 py-1 rounded text-xs font-semibold bg-brand-700 text-white transition">
+        🌐 Website Người Dùng
+      </button>
+      <button onclick="switchView('avm')" id="btn-view-avm" class="px-3 py-1 rounded text-xs font-semibold text-slate-300 hover:text-white transition">
+        🗺️ Trải Nghiệm Tra Cứu AVM
+      </button>
+      <button onclick="switchView('admin')" id="btn-view-admin" class="px-3 py-1 rounded text-xs font-semibold text-slate-300 hover:text-white transition">
+        ⚙️ Giao Diện Admin Quản Trị
+      </button>
+    </div>
+
+    <div class="hidden lg:flex items-center gap-4 text-slate-300">
+      <a href="presentation/presentation.html" class="hover:text-emerald-400 flex items-center gap-1 transition">
+        <i data-lucide="presentation" class="w-3.5 h-3.5"></i> Mở Slide Thuyết Trình
+      </a>
+      <span class="text-slate-600">|</span>
+      <span>Hotline: 0853.29.3333</span>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1. VIEW: FRONTEND PUBLIC WEBSITE           -->
+  <!-- ========================================== -->
+  <div id="view-frontend" class="view-container">
+
+    <!-- Header Navigation -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-[41px] z-40 border-b border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        
+        <!-- Logo -->
+        <a href="#home" class="flex items-center gap-2 group">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-700 to-emerald-500 flex items-center justify-center text-white shadow-lg shadow-brand-700/20 group-hover:scale-105 transition">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <div class="text-2xl font-black tracking-tight text-slate-900 leading-none">
+              <span class="text-slate-900">R<span class="text-brand-700">★</span>te</span><span class="text-brand-700">Smart</span>
+            </div>
+            <div class="text-[9px] uppercase tracking-wider text-slate-400 font-semibold mt-0.5">Thành viên Lotus VFI</div>
+          </div>
+        </a>
+
+        <!-- Desktop Menu -->
+        <nav class="hidden md:flex items-center space-x-7 text-sm font-semibold text-slate-600">
+          <a href="#home" class="hover:text-brand-700 text-brand-700 transition">Trang Chủ</a>
+          <a href="#about" class="hover:text-brand-700 transition">Về Chúng Tôi</a>
+          <a href="#database" class="hover:text-brand-700 transition">Cơ Sở Dữ Liệu</a>
+          <a href="#solutions" class="hover:text-brand-700 transition">Giải Pháp Hợp Tác</a>
+          <a href="#clients" class="hover:text-brand-700 transition">Khách Hàng</a>
+          <a href="#news" class="hover:text-brand-700 transition">Thị Trường</a>
+          <a href="#contact" class="hover:text-brand-700 transition">Liên Hệ</a>
+        </nav>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center gap-3">
+          <button onclick="switchView('avm')" class="hidden sm:inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-brand-700 text-brand-700 font-semibold text-sm hover:bg-brand-50 transition">
+            <i data-lucide="map-pin" class="w-4 h-4"></i> Tra Cứu AVM Demo
+          </button>
+          <a href="#contact" class="px-5 py-2.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-semibold text-sm shadow-md shadow-brand-700/20 hover:shadow-lg transition">
+            Đăng Ký Tư Vấn
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- SECTION: HERO -->
+    <section id="home" class="relative pt-16 pb-24 lg:pt-24 lg:pb-32 overflow-hidden bg-gradient-to-b from-white via-brand-50/40 to-slate-50">
+      <div class="absolute inset-0 z-0 opacity-40">
+        <div class="absolute top-10 left-1/4 w-96 h-96 bg-emerald-200/50 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-96 h-96 bg-brand-100/60 rounded-full blur-3xl"></div>
+      </div>
+
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-12 gap-12 items-center">
+          
+          <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-100/80 border border-brand-200 text-brand-800 text-xs font-bold uppercase tracking-wider">
+              <i data-lucide="shield-check" class="w-4 h-4 text-brand-700"></i>
+              Nền tảng trực thuộc Thẩm định giá Hoa Sen (Lotus VFI)
+            </div>
+
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
+              Nền Tảng Dữ Liệu Giá & <br/>
+              <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-700 to-emerald-600">Định Giá Tự Động (AVM)</span> Hàng Đầu
+            </h1>
+
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
+              Ứng dụng công nghệ Big Data, AI và nền tảng dữ liệu thực tế từ Công ty Thẩm định giá Hoa Sen. Giải pháp tra cứu, thẩm định và quản trị rủi ro tài sản bảo đảm chuẩn xác hàng đầu cho Ngân hàng và Tổ chức tài chính.
+            </p>
+
+            <!-- Search Bar Mockup -->
+            <div class="p-2 bg-white rounded-2xl shadow-xl shadow-slate-200/70 border border-slate-200/90 max-w-2xl mx-auto lg:mx-0">
+              <div class="flex flex-col sm:flex-row items-center gap-2">
+                <div class="flex items-center gap-2 px-3 py-2 w-full text-slate-400">
+                  <i data-lucide="search" class="w-5 h-5 text-brand-700 shrink-0"></i>
+                  <input type="text" placeholder="Nhập địa chỉ BĐS (VD: 631 QL21B, Bích Hòa, Thanh Oai, Hà Nội)..." value="631 QL21B, Bích Hòa, Thanh Oai, Hà Nội" class="w-full text-slate-800 text-sm focus:outline-none placeholder:text-slate-400 font-medium">
+                </div>
+                <button onclick="switchView('avm')" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-sm whitespace-nowrap shadow-md shadow-brand-700/20 transition flex items-center justify-center gap-2">
+                  <i data-lucide="sparkles" class="w-4 h-4"></i> Tra Cứu AVM
+                </button>
+              </div>
+            </div>
+
+            <!-- Fast Stats -->
+            <div class="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-200/70">
+              <div>
+                <div class="text-2xl font-black text-slate-900">63</div>
+                <div class="text-xs text-slate-500 font-medium mt-0.5">Tỉnh thành Bảng giá NN</div>
+              </div>
+              <div>
+                <div class="text-2xl font-black text-brand-700">20.000+</div>
+                <div class="text-xs text-slate-500 font-medium mt-0.5">Tài sản TĐG Hoa Sen</div>
+              </div>
+              <div>
+                <div class="text-2xl font-black text-slate-900">10.000+</div>
+                <div class="text-xs text-slate-500 font-medium mt-0.5">BĐS thị trường xác thực</div>
+              </div>
+              <div>
+                <div class="text-2xl font-black text-brand-700">35</div>
+                <div class="text-xs text-slate-500 font-medium mt-0.5">Tỉnh thành Data Ngân hàng</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Hero Image / Visual Mockup -->
+          <div class="lg:col-span-5 relative">
+            <div class="relative mx-auto max-w-md lg:max-w-none">
+              <div class="absolute -top-6 -left-6 w-72 h-72 bg-brand-100 rounded-full mix-blend-multiply filter blur-2xl opacity-70"></div>
+              <div class="relative bg-white p-5 rounded-3xl shadow-2xl border border-slate-200">
+                <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-red-400"></span>
+                    <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+                    <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+                    <span class="text-xs font-mono text-slate-400 ml-2">ratesmart.com.vn/tra-cuu</span>
+                  </div>
+                  <span class="text-xs font-bold text-brand-700 bg-brand-50 px-2 py-0.5 rounded">LIVE DEMO</span>
+                </div>
+                
+                <!-- Card mini preview -->
+                <div class="mt-4 rounded-xl overflow-hidden border border-slate-200 relative group cursor-pointer" onclick="switchView('avm')">
+                  <img src="slides_img/page-13.png" alt="RateSmart Demo Screen" class="w-full h-56 object-cover object-top group-hover:scale-105 transition duration-500">
+                  <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent flex items-end p-4">
+                    <div class="text-white">
+                      <div class="text-xs text-emerald-300 font-semibold">Tài sản thử nghiệm</div>
+                      <div class="text-sm font-bold">QL21B, Cầu Thạch Bích, Hà Nội</div>
+                      <div class="text-xs text-slate-300">Ước tính AVM: 101.584.000 đ/m²</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-slate-50 rounded-xl flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2 text-slate-600 font-medium">
+                    <i data-lucide="check-circle" class="w-4 h-4 text-brand-700"></i>
+                    Đã chuẩn hóa 3 tài sản so sánh
+                  </div>
+                  <button onclick="switchView('avm')" class="text-brand-700 font-bold hover:underline">
+                    Xem kết quả →
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: CLIENTS & PARTNERS -->
+    <section id="clients" class="py-12 bg-white border-y border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <p class="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">
+          Được tin tưởng bởi các Định chế Tài chính & Doanh nghiệp hàng đầu
+        </p>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6 items-center">
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-slate-700 tracking-tight text-lg hover:border-brand-300 transition">
+            AGRIBANK
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-red-600 tracking-tight text-lg hover:border-brand-300 transition">
+            VDB Bank
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-slate-700 tracking-tight text-lg hover:border-brand-300 transition">
+            PUBLIC BANK
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-red-700 tracking-tight text-lg hover:border-brand-300 transition">
+            Co-opBank
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-blue-700 tracking-tight text-lg hover:border-brand-300 transition">
+            PGBank
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-amber-700 tracking-tight text-lg hover:border-brand-300 transition">
+            SCIC
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-blue-900 tracking-tight text-lg hover:border-brand-300 transition">
+            VAMC
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-blue-800 tracking-tight text-lg hover:border-brand-300 transition">
+            SAMSUNG
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-fuchsia-800 tracking-tight text-lg hover:border-brand-300 transition">
+            AEON MALL
+          </div>
+          <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-center font-black text-red-600 tracking-tight text-lg hover:border-brand-300 transition">
+            LOTTE
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: ABOUT US & LEADERSHIP -->
+    <section id="about" class="py-20 bg-slate-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="max-w-3xl mx-auto text-center space-y-4 mb-16">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-800 text-xs font-bold uppercase">
+            Về Chúng Tôi
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            Sự Kết Hợp Hoàn Hảo Giữa <br class="hidden sm:inline"/>
+            <span class="text-brand-700">Chuyên Môn Thẩm Định</span> & <span class="text-slate-900">Công Nghệ AI</span>
+          </h2>
+          <p class="text-slate-600 leading-relaxed">
+            RateSmart là công ty công nghệ thành viên của Công ty Thẩm định giá Hoa Sen (Lotus VFI), kế thừa hơn 20 năm uy tín chuyên sâu kết hợp năng lực kiến trúc công nghệ tiên tiến, hướng tới mục tiêu chuẩn hóa thị trường và thúc đẩy chuyển đổi số định giá tại Việt Nam.
+          </p>
+        </div>
+
+        <!-- Leadership Grid -->
+        <div class="grid md:grid-cols-3 gap-8">
+          
+          <!-- Leader 1: Vu Van Quan -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 bg-brand-50 text-brand-700 font-bold text-xs rounded-full uppercase">CEO RateSmart</span>
+              <i data-lucide="award" class="w-5 h-5 text-brand-700"></i>
+            </div>
+            <div class="h-44 rounded-xl bg-slate-100 overflow-hidden mb-4 relative">
+              <img src="slides_img/page-4.png" alt="Vũ Văn Quân" class="w-full h-full object-cover object-[50%_40%]">
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Vũ Văn Quân</h3>
+            <p class="text-xs font-semibold text-slate-500 mb-3">Chủ tịch & TGĐ Thẩm định giá Hoa Sen | Giám đốc RateSmart</p>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Hơn 20 năm kinh nghiệm thực chiến trong lĩnh vực thẩm định giá, M&A, kiểm toán và tài chính doanh nghiệp.
+            </p>
+          </div>
+
+          <!-- Leader 2: Nguyen Ngoc Bach -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 bg-blue-50 text-blue-700 font-bold text-xs rounded-full uppercase">COO RateSmart</span>
+              <i data-lucide="briefcase" class="w-5 h-5 text-blue-700"></i>
+            </div>
+            <div class="h-44 rounded-xl bg-slate-100 overflow-hidden mb-4 relative">
+              <img src="slides_img/page-4.png" alt="Nguyễn Ngọc Bách" class="w-full h-full object-cover object-[15%_40%]">
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Nguyễn Ngọc Bách</h3>
+            <p class="text-xs font-semibold text-slate-500 mb-3">Chủ tịch AsiaInvest | Phó CT CLB BĐS Hà Nội | COO RateSmart</p>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Hơn 25 năm kinh nghiệm về định giá tài sản, doanh nghiệp, xúc tiến đầu tư quốc tế và chiến lược M&A.
+            </p>
+          </div>
+
+          <!-- Leader 3: Nguyen Vinh Loc -->
+          <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition">
+            <div class="flex items-center justify-between mb-4">
+              <span class="px-3 py-1 bg-purple-50 text-purple-700 font-bold text-xs rounded-full uppercase">CTO RateSmart</span>
+              <i data-lucide="cpu" class="w-5 h-5 text-purple-700"></i>
+            </div>
+            <div class="h-44 rounded-xl bg-slate-100 overflow-hidden mb-4 relative">
+              <img src="slides_img/page-4.png" alt="Nguyễn Vĩnh Lộc" class="w-full h-full object-cover object-[85%_40%]">
+            </div>
+            <h3 class="text-xl font-bold text-slate-900">Nguyễn Vĩnh Lộc</h3>
+            <p class="text-xs font-semibold text-slate-500 mb-3">Giám đốc Kỹ thuật Luxcer Singapore | CTO RateSmart</p>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Học bổng Chính phủ Úc, hơn 20 năm kinh nghiệm kiến trúc cơ sở dữ liệu lớn (Big Data), khai phá dữ liệu và thuật toán AI.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION: DATABASE & 5-STEP PIPELINE -->
+    <section id="database" class="py-20 bg-white border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="max-w-3xl mx-auto text-center space-y-4 mb-16">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-800 text-xs font-bold uppercase">
+            Hạ Tầng Dữ Liệu Lớn (Big Data)
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            4 Trụ Cột Cơ Sở Dữ Liệu Giá Toàn Diện
+          </h2>
+          <p class="text-slate-600">
+            Dữ liệu được thu thập liên tục từ 4 nguồn chính thống, đảm bảo tính pháp lý, tính đại diện và khả năng truy xuất chuẩn xác.
+          </p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-500 transition">
+            <div class="w-12 h-12 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center mb-4">
+              <i data-lucide="landmark" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Giá Nhà Nước</h3>
+            <p class="text-sm text-slate-600 mb-4">Bảng giá do cơ quan nhà nước ban hành, được chuẩn hóa hệ số và khung phân bổ.</p>
+            <div class="text-xs font-semibold text-brand-700 bg-brand-50 p-2 rounded-lg">
+              ✓ 63 tỉnh thành (2020 - 2025)
+            </div>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-500 transition">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center mb-4">
+              <i data-lucide="trending-up" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Giá Thị Trường</h3>
+            <p class="text-sm text-slate-600 mb-4">Phản ánh thực tế cung - cầu từ các giao dịch thực, đối chiếu đa nguồn và loại bỏ nhiễu.</p>
+            <div class="text-xs font-semibold text-blue-700 bg-blue-50 p-2 rounded-lg">
+              ✓ 10.000+ tài sản so sánh xác thực
+            </div>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-500 transition">
+            <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
+              <i data-lucide="file-check-2" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Giá Thẩm Định</h3>
+            <p class="text-sm text-slate-600 mb-4">Hồ sơ thẩm định thực tế từ Công ty Thẩm định giá Hoa Sen, có hồ sơ pháp lý chuyên ngành.</p>
+            <div class="text-xs font-semibold text-emerald-700 bg-emerald-50 p-2 rounded-lg">
+              ✓ 20.000+ tài sản đã thẩm định
+            </div>
+          </div>
+
+          <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-brand-500 transition">
+            <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center mb-4">
+              <i data-lucide="shield-alert" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-900 mb-2">Giá Ngân Hàng</h3>
+            <p class="text-sm text-slate-600 mb-4">Hệ thống dữ liệu tham chiếu tài sản bảo đảm dùng cho công tác thẩm định tín dụng.</p>
+            <div class="text-xs font-semibold text-purple-700 bg-purple-50 p-2 rounded-lg">
+              ✓ Bảng giá NH của 35 tỉnh thành
+            </div>
+          </div>
+        </div>
+
+        <!-- 5-Step Pipeline -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-8 lg:p-12 shadow-xl">
+          <div class="text-center max-w-2xl mx-auto mb-12">
+            <span class="text-emerald-400 font-bold text-xs uppercase tracking-wider">Quy Trình Chuẩn Hóa Độc Quyền</span>
+            <h3 class="text-2xl sm:text-3xl font-extrabold mt-1">5 Bước Xây Dựng & Xác Thực Dữ Liệu Giá</h3>
+          </div>
+
+          <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div class="space-y-3 bg-white/5 p-4 rounded-xl border border-white/10">
+              <div class="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm">1</div>
+              <h4 class="font-bold text-white text-base">Thu thập đa nguồn</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">Giao dịch sàn, cơ quan quản lý, hồ sơ thẩm định và nền tảng số.</p>
+            </div>
+            <div class="space-y-3 bg-white/5 p-4 rounded-xl border border-white/10">
+              <div class="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm">2</div>
+              <h4 class="font-bold text-white text-base">Chuẩn hóa & Làm sạch</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">Thuật toán loại bỏ trùng lặp, thiếu thông tin và giao dịch ảo.</p>
+            </div>
+            <div class="space-y-3 bg-white/5 p-4 rounded-xl border border-white/10">
+              <div class="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm">3</div>
+              <h4 class="font-bold text-white text-base">Gắn ngữ cảnh & Meta</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">Phân loại khu vực, phân khúc, lộ giới, hình thể và điều kiện giao dịch.</p>
+            </div>
+            <div class="space-y-3 bg-white/5 p-4 rounded-xl border border-white/10">
+              <div class="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm">4</div>
+              <h4 class="font-bold text-white text-base">Xác thực đa lớp</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">Đối chiếu chéo, kiểm định thống kê và rà soát bởi định giá viên.</p>
+            </div>
+            <div class="space-y-3 bg-white/5 p-4 rounded-xl border border-white/10">
+              <div class="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-sm">5</div>
+              <h4 class="font-bold text-white text-base">Hiệu chỉnh liên tục</h4>
+              <p class="text-xs text-slate-300 leading-relaxed">Tự động hiệu chỉnh mô hình giá liên tục theo biến động thực tế.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- SECTION: SOLUTIONS -->
+    <section id="solutions" class="py-20 bg-slate-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-3xl mx-auto text-center space-y-4 mb-16">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-100 text-brand-800 text-xs font-bold uppercase">
+            Mô Hình Hợp Tác Doanh Nghiệp
+          </div>
+          <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            3 Hình Thức Đề Xuất Hợp Tác Với Ngân Hàng
+          </h2>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-brand-500 transition flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center font-black text-xl">1</div>
+              <h3 class="text-2xl font-bold text-slate-900">Cho Thuê Dịch Vụ (SaaS)</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">RateSmart tạo tài khoản cho ngân hàng để người dùng truy cập trực tiếp vào hệ thống dữ liệu giá để định giá tài sản.</p>
+            </div>
+            <div class="mt-8 pt-6 border-t border-slate-100">
+              <a href="#contact" class="w-full py-3 rounded-xl bg-brand-50 hover:bg-brand-700 hover:text-white text-brand-700 font-bold text-sm transition block text-center">Đăng Ký Tư Vấn Gói 1</a>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-8 border-2 border-brand-600 shadow-xl relative flex flex-col justify-between">
+            <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-brand-700 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow">Đề Xuất Phổ Biến</div>
+            <div class="space-y-4">
+              <div class="w-12 h-12 rounded-2xl bg-brand-700 text-white flex items-center justify-center font-black text-xl">2</div>
+              <h3 class="text-2xl font-bold text-slate-900">Cho Thuê Hệ Thống & Update Data</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">Tạo riêng 1 hệ thống tra cứu cài đặt trên Private Cloud hoặc máy chủ ngân hàng, định kỳ update dữ liệu giá mới.</p>
+            </div>
+            <div class="mt-8 pt-6 border-t border-slate-100">
+              <a href="#contact" class="w-full py-3 rounded-xl bg-brand-700 hover:bg-brand-800 text-white font-bold text-sm shadow transition block text-center">Đăng Ký Tư Vấn Gói 2</a>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl hover:border-brand-500 transition flex flex-col justify-between">
+            <div class="space-y-4">
+              <div class="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-xl">3</div>
+              <h3 class="text-2xl font-bold text-slate-900">Phát Triển Hệ Thống Riêng (Custom)</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">Sử dụng công nghệ lõi của RateSmart để may đo và phát triển hệ thống tra cứu riêng theo quy trình nghiệp vụ đặc thù.</p>
+            </div>
+            <div class="mt-8 pt-6 border-t border-slate-100">
+              <a href="#contact" class="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition block text-center">Đăng Ký Tư Vấn Gói 3</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: CONTACT & FOOTER -->
+    <section id="contact" class="py-20 bg-slate-900 text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-12 gap-12">
+          <div class="lg:col-span-5 space-y-6">
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-700/30 text-emerald-400 text-xs font-bold uppercase">Liên Hệ & Hợp Tác</span>
+            <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Sẵn Sàng Triển Khai Giải Pháp Định Giá Số?</h2>
+            <p class="text-slate-300 text-sm leading-relaxed">
+              Hãy để đội ngũ chuyên gia của RateSmart và Thẩm định giá Hoa Sen đồng hành, tư vấn giải pháp dữ liệu giá tối ưu nhất cho tổ chức của Quý khách.
+            </p>
+            <div class="space-y-4 pt-4 text-sm text-slate-300">
+              <div>Tòa nhà Licogi 13, số 164 Khuất Duy Tiến, Thanh Xuân, Hà Nội</div>
+              <div>Hotline: <strong class="text-white">0853 293 333</strong> | Website: ratesmart.com.vn</div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-7 bg-slate-800/90 p-8 rounded-3xl border border-slate-700 shadow-2xl">
+            <h3 class="text-xl font-bold mb-6">Đăng Ký Nhận Tư Vấn & Tài Khoản Demo</h3>
+            <form onsubmit="handleContactSubmit(event)" class="space-y-4">
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-medium text-slate-400 mb-1">Họ và tên *</label>
+                  <input required type="text" placeholder="Nguyễn Văn A" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-400 mb-1">Số điện thoại *</label>
+                  <input required type="tel" placeholder="0912 345 678" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                </div>
+              </div>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-medium text-slate-400 mb-1">Email công việc *</label>
+                  <input required type="email" placeholder="a.nguyen@bank.com.vn" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-400 mb-1">Cơ quan / Ngân hàng *</label>
+                  <input required type="text" placeholder="Ngân hàng ABC / CN Hà Nội" class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-brand-500 focus:outline-none">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-medium text-slate-400 mb-1">Nội dung yêu cầu chi tiết</label>
+                <textarea rows="3" placeholder="Quý khách vui lòng cho biết nhu cầu tra cứu và số lượng cán bộ sử dụng..." class="w-full px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:border-brand-500 focus:outline-none"></textarea>
+              </div>
+              <button type="submit" class="w-full py-3.5 rounded-xl bg-brand-700 hover:bg-brand-600 text-white font-bold text-sm shadow-lg transition">
+                Gửi Yêu Cầu Tư Vấn Ngay
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. VIEW: AVM LIVE INTERACTIVE TOOL & MAP   -->
+  <!-- ========================================== -->
+  <div id="view-avm" class="view-container hidden min-h-screen bg-slate-100 flex flex-col">
+    <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="#home" onclick="switchView('frontend')" class="text-slate-500 hover:text-slate-900 flex items-center gap-1 text-sm font-semibold">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> Về Trang Chủ
+        </a>
+        <span class="text-slate-300">|</span>
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="font-bold text-slate-900 text-sm">Hệ Thống Tra Cứu AVM - RateSmart</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="toggleModal('modal-criteria')" class="px-3.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-700 text-xs font-bold hover:bg-slate-50 flex items-center gap-1.5">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4 text-brand-700"></i> Chuẩn Mực Thẩm Định
+        </button>
+        <button onclick="alert('Đang tạo Phiếu tra cứu PDF...')" class="px-3.5 py-1.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm">
+          <i data-lucide="file-text" class="w-4 h-4"></i> Xuất Phiếu Tra Cứu
+        </button>
+      </div>
+    </div>
+
+    <div class="flex-1 grid lg:grid-cols-12 overflow-hidden">
+      <div class="lg:col-span-5 bg-white border-r border-slate-200 p-5 overflow-y-auto max-h-[calc(100vh-100px)] space-y-5">
+        <div class="space-y-2">
+          <label class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-brand-700"></i> Địa chỉ tra cứu giá:
+          </label>
+          <div class="flex gap-2">
+            <input id="avm-address-input" type="text" value="631 QL21B, Bích Hòa, Thanh Oai, Hà Nội" class="w-full text-xs font-semibold px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-brand-700">
+            <button onclick="calculateAVM()" class="px-3 py-2 bg-brand-700 text-white rounded-lg text-xs font-bold hover:bg-brand-800 shrink-0">
+              Định Giá
+            </button>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-gradient-to-br from-brand-700 to-emerald-800 text-white shadow-lg space-y-3">
+          <div class="flex items-center justify-between text-xs">
+            <span class="font-bold text-emerald-200 uppercase tracking-wider">Ước Tính AVM Rút Gọn</span>
+            <span class="bg-white/20 px-2 py-0.5 rounded text-[11px] font-mono">Độ tin cậy: 94.8%</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 pt-1">
+            <div>
+              <div class="text-[11px] text-emerald-100">Đơn giá ước tính:</div>
+              <div class="text-2xl font-black text-white" id="val-unit-price">101.584.000 <span class="text-xs font-normal">đ/m²</span></div>
+            </div>
+            <div>
+              <div class="text-[11px] text-emerald-100">Tổng giá trị (96m²):</div>
+              <div class="text-2xl font-black text-amber-300" id="val-total-price">9.752.064.000 <span class="text-xs font-normal text-white">đ</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-4 h-4 text-brand-700"></i> 3 Tài Sản So Sánh Tương Đồng Nhất:
+          </h4>
+        </div>
+
+        <div class="space-y-3" id="comparables-list">
+          <div class="p-3.5 rounded-xl border-2 border-brand-500/40 bg-brand-50/30 hover:bg-brand-50 transition cursor-pointer" onclick="zoomToPoint(20.9106085, 105.7605428, 'Kim Bài')">
+            <div class="flex items-start justify-between">
+              <span class="font-bold text-slate-900 text-xs">#1. Thị trấn Kim Bài, Thanh Oai, Hà Nội</span>
+              <span class="text-xs font-black text-brand-700">120.000.000 đ/m²</span>
+            </div>
+            <p class="text-[11px] text-slate-600 mt-1">Đường QL21B • Mặt tiền 5m • Đất ở tại đô thị (90m²)</p>
+          </div>
+
+          <div class="p-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition cursor-pointer" onclick="zoomToPoint(20.9064092, 105.7622588, 'Kỳ Thủy')">
+            <div class="flex items-start justify-between">
+              <span class="font-bold text-slate-900 text-xs">#2. Thôn Kỳ Thủy, Bích Hòa, Thanh Oai</span>
+              <span class="text-xs font-black text-brand-700">105.000.000 đ/m²</span>
+            </div>
+            <p class="text-[11px] text-slate-600 mt-1">Cách QL21B khoảng 50m • Đất thổ cư (30m²)</p>
+          </div>
+
+          <div class="p-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition cursor-pointer" onclick="zoomToPoint(20.910194, 105.76066, 'Kim Bài Đoạn 2')">
+            <div class="flex items-start justify-between">
+              <span class="font-bold text-slate-900 text-xs">#3. Thị trấn Kim Bài (Đoạn 2), Thanh Oai</span>
+              <span class="text-xs font-black text-brand-700">100.000.000 đ/m²</span>
+            </div>
+            <p class="text-[11px] text-slate-600 mt-1">Đoạn cầu Thạch Bích đến ngã ba bệnh viện • Vị trí VT1</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7 bg-slate-200 relative p-4 flex flex-col">
+        <div class="flex-1 bg-white rounded-xl shadow border border-slate-300 overflow-hidden relative">
+          <div id="map" class="h-full w-full"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. VIEW: ADMIN CMS CONTROL PANEL           -->
+  <!-- ========================================== -->
+  <div id="view-admin" class="view-container hidden min-h-screen bg-slate-900 text-slate-100 flex flex-col">
+    <div class="flex-1 flex overflow-hidden">
+      <aside class="w-64 bg-slate-950 border-r border-slate-800 p-5 flex flex-col justify-between shrink-0">
+        <div class="space-y-6">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-brand-700 flex items-center justify-center text-white font-black">RS</div>
+            <div>
+              <div class="font-bold text-white text-base">RateSmart Admin</div>
+              <div class="text-[10px] text-emerald-400 font-mono">Laravel 11 CMS</div>
+            </div>
+          </div>
+        </div>
+        <button onclick="switchView('frontend')" class="w-full py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs rounded-lg font-medium flex items-center justify-center gap-1.5">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i> Về Website
+        </button>
+      </aside>
+
+      <main class="flex-1 bg-slate-900 overflow-y-auto p-8">
+        <div class="space-y-6">
+          <h2 class="text-2xl font-black text-white">Tổng Quan Quản Trị Hệ Thống RateSmart</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800">
+              <div class="text-xs text-slate-400">Bảng Giá Nhà Nước</div>
+              <div class="text-2xl font-black text-white mt-1">63 Tỉnh Thành</div>
+            </div>
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800">
+              <div class="text-xs text-slate-400">Tài Sản Thẩm Định Hoa Sen</div>
+              <div class="text-2xl font-black text-emerald-400 mt-1">20.480</div>
+            </div>
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800">
+              <div class="text-xs text-slate-400">BĐS Thị Trường Xác Thực</div>
+              <div class="text-2xl font-black text-blue-400 mt-1">10.150</div>
+            </div>
+            <div class="bg-slate-950 p-5 rounded-2xl border border-slate-800">
+              <div class="text-xs text-slate-400">Yêu Cầu Hợp Tác Ngân Hàng</div>
+              <div class="text-2xl font-black text-amber-400 mt-1">28</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    function switchView(viewName) {
+      document.querySelectorAll('.view-container').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) target.classList.remove('hidden');
+
+      ['frontend', 'avm', 'admin'].forEach(v => {
+        const btn = document.getElementById(`btn-view-${v}`);
+        if (btn) {
+          if (v === viewName) {
+            btn.className = "px-3 py-1 rounded text-xs font-semibold bg-brand-700 text-white transition";
+          } else {
+            btn.className = "px-3 py-1 rounded text-xs font-semibold text-slate-300 hover:text-white transition";
+          }
+        }
+      });
+
+      if (viewName === 'avm') {
+        setTimeout(initMapIfNeeded, 200);
+      }
+      window.scrollTo(0, 0);
+    }
+
+    let mapInstance = null;
+    function initMapIfNeeded() {
+      if (mapInstance) {
+        mapInstance.invalidateSize();
+        return;
+      }
+      const centerCoords = [20.907974, 105.761254];
+      mapInstance = L.map('map').setView(centerCoords, 14);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; RateSmart AVM'
+      }).addTo(mapInstance);
+
+      L.marker(centerCoords).addTo(mapInstance).bindPopup('<b>Tài sản định giá</b><br>631 QL21B, Bích Hòa<br>101.584.000 đ/m²').openPopup();
+      L.marker([20.9106085, 105.7605428]).addTo(mapInstance).bindPopup('<b>TSSS 1: Kim Bài</b><br>120 tr/m²');
+      L.marker([20.9064092, 105.7622588]).addTo(mapInstance).bindPopup('<b>TSSS 2: Kỳ Thủy</b><br>105 tr/m²');
+      L.marker([20.910194, 105.76066]).addTo(mapInstance).bindPopup('<b>TSSS 3: Kim Bài Đoạn 2</b><br>100 tr/m²');
+    }
+
+    function zoomToPoint(lat, lng, title) {
+      if (mapInstance) mapInstance.flyTo([lat, lng], 16, { duration: 1 });
+    }
+
+    function calculateAVM() {
+      alert('Đang tính toán giá trị tài sản qua thuật toán AVM...\nĐơn giá: 101.584.000 đ/m² | Tổng: 9.752.064.000 đ');
+    }
+
+    function handleContactSubmit(e) {
+      e.preventDefault();
+      alert('Cảm ơn Quý khách! RateSmart & Lotus VFI đã tiếp nhận yêu cầu.');
+      e.target.reset();
+    }
+
+    lucide.createIcons();
+  </script>
+</body>
+</html>

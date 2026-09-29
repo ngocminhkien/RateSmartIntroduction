@@ -1,4 +1,11 @@
 {
+  "name": "ratesmart-introduction",
+  "version": "1.0.0",
+  "description": "RateSmart - Nền tảng Dữ liệu giá & Định giá tự động (AVM)",
+  "scripts": {
+    "build": "echo Build successful",
+    "start": "node server.js"
+  },
   "dependencies": {
     "pdf-parse": "^2.4.5"
   }

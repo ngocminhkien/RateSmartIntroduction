@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "cleanUrls": true,
+  "routes": [
+    {
+      "src": "/presentation",
+      "dest": "/presentation/presentation.html"
+    },
+    {
+      "src": "/prototype",
+      "dest": "/prototype/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+}
