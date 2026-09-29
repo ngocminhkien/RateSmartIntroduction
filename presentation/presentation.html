@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Báo Cáo Thiết Kế Website RateSmart - Buổi Thảo Luận Văn Phòng</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #008037;
+      --color-primary-light: #10b981;
+      --color-secondary: #0f172a;
+      --color-accent: #f59e0b;
+      --color-bg: #090e17;
+      --color-card: #111a2e;
+      --color-text: #f8fafc;
+      --color-muted: #94a3b8;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--color-bg);
+      color: var(--color-text);
+      font-family: 'Inter', sans-serif;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* 16:9 Container */
+    .slide-deck {
+      position: absolute;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    @media (min-width: 769px) {
+      .slide-deck {
+        max-width: calc(100vh * 16 / 9);
+        max-height: calc(100vw * 9 / 16);
+        margin: auto;
+      }
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      padding: 48px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      transform: translateY(10px);
+      background: radial-gradient(circle at 80% 20%, #0d2818 0%, #090e17 70%);
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* Header & Footer */
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 16px;
+    }
+
+    .brand-logo {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 800;
+      font-size: 20px;
+      letter-spacing: -0.5px;
+    }
+    .brand-logo span { color: var(--color-primary-light); }
+
+    .slide-category {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-primary-light);
+      font-weight: 700;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 24px 0;
+    }
+
+    .slide-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(26px, 3.5vw, 44px);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .slide-title .gradient-text {
+      background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-subtitle {
+      font-size: 16px;
+      color: var(--color-muted);
+      max-width: 800px;
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    /* Cards & Grids */
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+
+    .feature-card {
+      background: var(--color-card);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      transition: transform 0.3s ease;
+    }
+    .feature-card.highlight {
+      border-color: rgba(16, 185, 129, 0.4);
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, rgba(17, 26, 46, 0.9) 100%);
+    }
+
+    .card-num {
+      font-size: 28px;
+      font-weight: 800;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--color-primary-light);
+      margin-bottom: 8px;
+    }
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+    .card-desc {
+      font-size: 13px;
+      color: var(--color-muted);
+      line-height: 1.45;
+    }
+
+    /* Controls */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 16px;
+      font-size: 13px;
+      color: var(--color-muted);
+    }
+
+    .nav-btn {
+      background: var(--color-card);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--color-primary);
+      border-color: var(--color-primary-light);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="slide-deck">
+
+    <!-- SLIDE 1: COVER -->
+    <div class="slide active" id="slide-1">
+      <div class="slide-header">
+        <div class="brand-logo">R<span>★</span>teSmart</div>
+        <div class="slide-category">Báo Cáo Giai Đoạn 1 - 3 • Bước Thảo Luận Văn Phòng</div>
+      </div>
+      <div class="slide-body" style="text-align: center; align-items: center;">
+        <div style="display: inline-block; padding: 6px 18px; border-radius: 99px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; font-weight: 700; font-size: 13px; margin-bottom: 20px;">
+          KẾ HOẠCH & BẢN THIẾT KẾ ĐỘC BẢN WEBSITE RATESMART
+        </div>
+        <h1 class="slide-title" style="font-size: 48px;">
+          Nền Tảng Dữ Liệu Giá & <br/>
+          <span class="gradient-text">Định Giá Tự Động Thông Minh</span>
+        </h1>
+        <p class="slide-subtitle" style="text-align: center;">
+          Dự án xây dựng Website giới thiệu công ty và Cổng quản trị Admin CMS cho RateSmart<br/>
+          (Công ty thành viên Công ty Thẩm định giá Hoa Sen - Lotus VFI)
+        </p>
+        <div style="margin-top: 20px; display: flex; gap: 16px;">
+          <a href="../prototype/index.html" target="_blank" class="nav-btn" style="background: var(--color-primary); padding: 10px 24px; font-size: 14px; text-decoration: none;">
+            🚀 Mở Prototype Tương Tác Live
+          </a>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <div>Thực hiện: <strong>AI Pair-Programmer & Kỹ sư Dự án</strong></div>
+        <div>Slide 1 / 9 • Nhấn phím [→] để tiếp tục</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: NGUỒN GỐC & NĂNG LỰC CỐT LÕI -->
+    <div class="slide" id="slide-2">
+      <div class="slide-header">
+        <div class="brand-logo">R<span>★</span>teSmart</div>
+        <div class="slide-category">Phân Tích Tài Liệu Giới Thiệu (24 Trang)</div>
+      </div>
+      <div class="slide-body">
+        <h2 class="slide-title">Bảo Chứng Chuyên Môn & Năng Lực Dữ Liệu</h2>
+        <p class="slide-subtitle">RateSmart kế thừa nền tảng uy tín vững chắc từ Thẩm định giá Hoa Sen kết hợp cùng năng lực Big Data & AI hàng đầu.</p>
+        <div class="grid-3">
+          <div class="feature-card highlight">
+            <div class="card-num">Lotus VFI</div>
+            <div class="card-title">Thẩm Định Giá Hoa Sen</div>
+            <div class="card-desc">Thương hiệu thẩm định giá uy tín hơn 20 năm tại Việt Nam, đối tác chiến lược của các ngân hàng nhà nước và thương mại lớn.</div>
+          </div>
+          <div class="feature-card">
+            <div class="card-num">AVM & AI</div>
+            <div class="card-title">Mô Hình Định Giá Tự Động</div>
+            <div class="card-desc">Ứng dụng thuật toán học máy, đối chiếu 3 tài sản so sánh tương đồng trên bản đồ số, tối ưu thời gian định giá chỉ trong vài giây.</div>
+          </div>
+          <div class="feature-card">
+            <div class="card-num">Leadership</div>
+            <div class="card-title">Ban Lãnh Đạo Tinh Hoa</div>
+            <div class="card-desc">Hội tụ các chuyên gia kỳ cựu: Ông Vũ Văn Quân (CEO), Ông Nguyễn Ngọc Bách (COO, AsiaInvest), Ông Nguyễn Vĩnh Lộc (CTO, Úc/Luxcer).</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <div>Nguồn: Tài liệu RateSmart Introduction.pdf</div>
+        <div>Slide 2 / 9</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: 4 TRỤ CỘT DỮ LIỆU & QUY TRÌNH 5 BƯỚC -->
+    <div class="slide" id="slide-3">
+      <div class="slide-header">
+        <div class="brand-logo">R<span>★</span>teSmart</div>
+        <div class="slide-category">Hạ Tầng Big Data Giá</div>
+      </div>
+      <div class="slide-body">
+        <h2 class="slide-title">4 Nguồn Dữ Liệu Lớn & Quy Trình Xác Thực 5 Bước</h2>
+        <div class="grid-4" style="margin-bottom: 20px;">
+          <div class="feature-card">
+            <div class="card-num">63 Tỉnh</div>
+            <div class="card-title">Giá Nhà Nước</div>
+            <div class="card-desc">Phủ 100% bảng giá đất 2020 - 2025.</div>
+          </div>
+          <div class="feature-card">
+            <div class="card-num">20.000+</div>
+            <div class="card-title">Giá Thẩm Định</div>
+            <div class="card-desc">Hồ sơ thẩm định thực tế của Hoa Sen Valuation.</div>
+          </div>
+          <div class="feature-card">
+            <div class="card-num">10.000+</div>
+            <div class="card-title">Giá Thị Trường</div>
+            <div class="card-desc">BĐS giao dịch thực tế đã qua lọc bất thường.</div>
+          </div>
+          <div class="feature-card">
+            <div class="card-num">35 Tỉnh</div>
+            <div class="card-title">Giá Ngân Hàng</div>
+            <div class="card-desc">Dữ liệu tham chiếu tài sản bảo đảm.</div>
+          </div>
+        </div>
+        <div style="background: rgba(255,255,255,0.04); border-radius: 12px; padding: 14px 20px; font-size: 13px; color: #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
+          <span><strong>Quy trình 5 bước:</strong> 1. Thu thập đa nguồn → 2. Chuẩn hóa & làm sạch → 3. Phân loại & gắn ngữ cảnh → 4. Xác thực đa lớp → 5. Hiệu chỉnh thời gian thực.</span>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <div>Hạ tầng dữ liệu chuẩn mực phục vụ ngành Ngân hàng</div>
+        <div>Slide 3 / 9</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: CẤU TRÚC MENU WEBSITE -->
+    <div class="slide" id="slide-4">
+      <div class="slide-header">
+        <div class="brand-logo">R<span>★</span>teSmart</div>
+        <div class="slide-category">Tư Duy Kiến Trúc Menu & Nội Dung (Bước 2)</div>
+      </div>
+      <div class="slide-body">
+        <h2 class="slide-title">Kiến Trúc Menu Website RateSmart Chuẩn B2B</h2>
+        <div class="grid-2">
+          <div class="feature-card">
+            <div class="card-title" style="color: var(--color-primary-light); font-size: 18px; margin-bottom: 12px;">
+              🌐 Menu Người Dùng (Frontend Website)
+            </div>
+            <ul style="font-size: 13px; line-height: 1.8; color: #cbd5e1; list-style-position: inside;">
+              <li><strong>Trang Chủ</strong>: Hero định giá, thống kê 63 tỉnh, proof points, CTA.</li>
+              <li><strong>Về Chúng Tôi</strong>: Hệ sinh thái Hoa Sen, Ban lãnh đạo, Giá trị cốt lõi.</li>
+              <li><strong>Cơ Sở Dữ Liệu</strong>: 4 Trụ cột data giá, quy trình 5 bước xác thực.</li>
+              <li><strong>Giải Pháp & Hợp Tác</strong>: 3 Gói dành riêng cho Ngân hàng.</li>
+              <li><strong>Tra Cứu AVM Demo</strong>: Trải nghiệm định giá vệ tinh tương tác.</li>
+              <li><strong>Thị Trường & Tin Tức</strong>: Báo cáo biến động giá, pháp lý đất đai.</li>
+              <li><strong>Liên Hệ</strong>: Trụ sở Licogi 13, form tư vấn và hotline.</li>
+            </ul>
+          </div>
+
+          <div class="feature-card highlight">
+            <div class="card-title" style="color: #60a5fa; font-size: 18px; margin-bottom: 12px;">
+              ⚙️ Menu Quản Trị (Admin Control Panel)
+            </div>
+            <ul style="font-size: 13px; line-height: 1.8; color: #cbd5e1; list-style-position: inside;">
+              <li><strong>Dashboard</strong>: Lượt tra cứu AVM, biểu đồ tăng trưởng, lead mới.</li>
+              <li><strong>Quản Lý Dữ Liệu Giá</strong>: CRUD bảng giá Nhà nước & TSSS thị trường.</li>
+              <li><strong>Hồ Sơ Thẩm Định</strong>: Import dữ liệu Hoa Sen, phê duyệt kiểm định.</li>
+              <li><strong>Quản Lý Dịch Vụ</strong>: 3 Gói hợp tác SaaS, On-premise, Custom.</li>
+              <li><strong>Quản Lý Tin Tức & Báo Cáo</strong>: Trình soạn thảo WYSIWYG, SEO.</li>
+              <li><strong>Quản Lý Leads Khách Hàng</strong>: Xử lý yêu cầu demo, xuất CSV.</li>
+              <li><strong>Cài Đặt Hệ Thống</strong>: Phân quyền vai trò, API bản đồ số, mail.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <div>Đáp ứng đầy đủ yêu cầu Trang Khách & Trang Quản trị Admin</div>
+        <div>Slide 4 / 9</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: BRAND IDENTITY & DESIGN SYSTEM -->
+    <div class="slide" id="slide-5">
+      <div class="slide-header">
+        <div class="brand-logo">R<span>★</span>teSmart</div>
+        <div class="slide-category">Hệ Thống Thiết Kế & Nhận Diện Thương Hiệu</div>
+      </div>
+      <div class="slide-body">
+        <h2 class="slide-title">Design System & Ngôn Ngữ Thiết Kế Độc Bản</h2>
+        <div class="grid-3">
+          <div class="feature-card">
+            <div style="height: 48px; border-radius: 8px; background: #008037; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px;">
+              #008037 • RateSmart Green
+            </div>
+            <div class="card-title">Màu Sắc Thương Hiệu</div>
+            <div class="card-desc">Sắc xanh lá cây đặc trưng từ logo chính thức biểu trưng cho sự tăng trưởng, độ tin cậy và số hóa tài chính.</div>
+          </div>
+
+          <div class="feature-card">
+            <div style="height: 48px; border-radius: 8px; background: #0f172a; border: 1px solid #334155; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #94a3b8;">
+              Plus Jakarta Sans + Inter
+            </div>
+            <div class="card-title">Typography Hiện Đại</div>
+            <div class="card-desc">Kết hợp cặp font hình học hiện đại cho tiêu đề sắc nét và Inter cho văn bản đọc êm ái trên màn hình số.</div>
+          </div>
+
+          <div class="feature-card">
+            <div style="height: 48px; border-radius: 8px; background: linear-gradient(135deg, rgba(0,128,55,0.2) 0%, rgba(15,23,42,0.8) 100%); border: 1px solid rgba(0,128,55,0.4); margin-bottom: 12px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #34d399;">
+              Glassmorphism & Clean Border
+            </div>
+            <div class="card-title">Phong Cách UI/UX</div>
+            <div class="card-desc">Phong cách Fintech/Proptech cao cấp: thẻ bo góc mềm (16px), đổ bóng nhẹ nhàng, micro-interactions tinh tế.</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <div>Chuẩn mực UI/UX hiện đại phù hợp môi trường Ngân hàng</div>
+        <div>Slide 5 / 9</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: TRẢI NGHIỆM ĐỊNH GIÁ AVM (MÔ PHỎNG SLIDE 13-16) -->
+    <div class="slide" id="slide-6">
+      <div class="slide-header">
+        <div class="brand-logo">R<span>★</span>teSmart</div>
+        <div class="slide-category">Sản Phẩm Cốt Lõi • Tra Cứu AVM Trực Tuyến</div>
+      </div>
+      <div class="slide-body">
+        <h2 class="slide-title">Trải Nghiệm Định Giá Tự Động Trên Bản Đồ Vệ Tinh</h2>
+        <div class="grid-2">
+          <div class="feature-card">
+            <div class="card-title" style="color: var(--color-primary-light);">Quy Trình Tra Cứu Người Dùng</div>
+            <ol style="font-size: 13px; line-height: 1.8; color: #cbd5e1; list-style-position: inside; margin-top: 8px;">
+              <li><strong>Nhập địa chỉ</strong>: Hệ thống định vị tọa độ GPS chính xác.</li>
+              <li><strong>Thiết lập chuẩn mực</strong>: Diện tích, mặt tiền, độ rộng đường, hình thửa đất (nở hậu, chữ nhật...), lợi thế kinh doanh.</li>
+              <li><strong>Hệ thống AVM quét dữ liệu</strong>: Tìm kiếm và đối chiếu 3 tài sản so sánh (TSSS) có mức độ tương đồng cao nhất.</li>
+              <li><strong>Xuất kết quả</strong>: Đơn giá ước tính (101.584.000 đ/m²) & Tổng giá trị (9.752.064.000 đ).</li>
+            </ol>
+          </div>
+          <div class="feature-card highlight" style="text-align: center;">
+            <div class="card-title" style="color: #ffffff; margin-bottom: 12px;">Đã Hiện Thực Hóa Trên Prototype</div>
+            <p class="card-desc" style="margin-bottom: 16px;">
+              Bản Prototype đã tích hợp sẵn bản đồ Leaflet Map, cho phép zoom, click xem chi tiết 3 điểm so sánh và biểu đồ biến động giá tương tác trực tiếp!
+            </p>
+            <a href="../prototype/index.html" target="_blank" class="nav-btn" style="background: var(--color-primary); display: inline-block;">
+              Xem Demo Trên Bản Đồ →
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <div>Tái hiện chính xác luồng nghiệp vụ trong tài liệu gốc</div>
+        <div>Slide 6 / 9</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: 3 HÌNH THỨC HỢP TÁC DOANH NGHIỆP -->
+    <div class="slide" id="slide-7">
+      <div class="slide-header">
+        <div class="brand-logo">R<span>★</span>teSmart</div>
+        <div class="slide-category">Chiến Lược Kinh Doanh & Đề Xuất Hợp Tác</div>
+      </div>
+      <div class="slide-body">
+        <h2 class="slide-title">3 Mô Hình Hợp Tác Linh Hoạt Dành Cho Ngân Hàng</h2>
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="card-num">01</div>
+            <div class="card-title">Cho Thuê Dịch Vụ (SaaS)</div>
+            <div class="card-desc">Cấp tài khoản tra cứu trực tuyến. Ngân hàng được phép upload bảng giá nội bộ riêng với cơ chế bảo mật nghiêm ngặt.</div>
+          </div>
+          <div class="feature-card highlight">
+            <div class="card-num">02</div>
+            <div class="card-title">Private Cloud & Update Data</div>
+            <div class="card-desc">Cài đặt toàn bộ hệ thống lên máy chủ riêng của ngân hàng, đào tạo vận hành tự chủ và định kỳ update dữ liệu giá mới nhất.</div>
+          </div>
+          <div class="feature-card">
+            <div class="card-num">03</div>
+            <div class="card-title">May Đo Hệ Thống (Custom Dev)</div>
+            <div class="card-desc">Dùng công nghệ lõi RateSmart để phát triển giải pháp tích hợp sâu vào quy trình phê duyệt tín dụng của ngân hàng.</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <div>Nội dung từ Slide 21 - 23 của tài liệu công ty</div>
+        <div>Slide 7 / 9</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: KẾ HOẠCH BƯỚC 4 (LARAVEL + MYSQL) -->
+    <div class="slide" id="slide-8">
+      <div class="slide-header">
+        <div class="brand-logo">R<span>★</span>teSmart</div>
+        <div class="slide-category">Lộ Trình Kỹ Thuật Bước 4 (PHP/Laravel)</div>
+      </div>
+      <div class="slide-body">
+        <h2 class="slide-title">Kiến Trúc Backend Laravel 11 & Cơ Sở Dữ Liệu MySQL</h2>
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="card-num">Backend</div>
+            <div class="card-title">Laravel 11 & PHP 8.2+</div>
+            <div class="card-desc">Kiến trúc MVC vững chắc, Eloquent ORM, RESTful API, tối ưu bảo mật CSRF/XSS, phân quyền Spatie Permissions.</div>
+          </div>
+          <div class="feature-card">
+            <div class="card-num">Database</div>
+            <div class="card-title">MySQL 8.0</div>
+            <div class="card-desc">Thiết kế 8 bảng dữ liệu chuẩn hóa: `property_data`, `users`, `services`, `posts`, `leads`, `team_members`, `settings`.</div>
+          </div>
+          <div class="feature-card">
+            <div class="card-num">Frontend</div>
+            <div class="card-title">Blade + Tailwind + Alpine</div>
+            <div class="card-desc">Giao diện tải nhanh, responsive 100% trên điện thoại/máy tính bảng, tương thích hoàn toàn với bản Prototype đã duyệt.</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <div>Sẵn sàng khởi tạo mã nguồn dự án Laravel ngay khi bước 3 được thông qua</div>
+        <div>Slide 8 / 9</div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: TỔNG KẾT & THẢO LUẬN -->
+    <div class="slide" id="slide-9">
+      <div class="slide-header">
+        <div class="brand-logo">R<span>★</span>teSmart</div>
+        <div class="slide-category">Tổng Kết & Phiên Thảo Luận</div>
+      </div>
+      <div class="slide-body" style="text-align: center; align-items: center;">
+        <h2 class="slide-title" style="font-size: 40px;">
+          Sẵn Sàng Cho Buổi Họp Văn Phòng & Triển Khai
+        </h2>
+        <p class="slide-subtitle" style="text-align: center;">
+          Chúng ta đã hoàn thành xuất sắc 3 bước đầu tiên: Đọc thấu hiểu tài liệu, xây dựng kiến trúc menu nội dung toàn diện và tạo ra bản thiết kế prototype sống động.
+        </p>
+        <div class="grid-3" style="max-width: 900px; width: 100%; margin-top: 10px;">
+          <div class="feature-card" style="text-align: left;">
+            <div class="card-title">1. Tài Liệu Đặc Tả</div>
+            <div class="card-desc">File RATESMART_WEBSITE_SPECIFICATION.md lưu trữ toàn bộ phân tích nghiệp vụ và DB Schema.</div>
+          </div>
+          <div class="feature-card highlight" style="text-align: left;">
+            <div class="card-title">2. Prototype Live</div>
+            <div class="card-desc">File prototype/index.html cho phép demo trực tiếp cả 3 màn hình: Website, Map AVM, và Admin Panel.</div>
+          </div>
+          <div class="feature-card" style="text-align: left;">
+            <div class="card-title">3. Slide Thuyết Trình</div>
+            <div class="card-desc">Bộ slide 16:9 chuyên nghiệp sẵn sàng trình chiếu tại văn phòng công ty.</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <div>Cảm ơn Ban Lãnh Đạo & Đồng Nghiệp! | Q&A</div>
+        <div>Slide 9 / 9</div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 9;
+
+    function showSlide(index) {
+      if (index < 1) index = 1;
+      if (index > totalSlides) index = totalSlides;
+
+      document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(`slide-${index}`);
+      if (target) {
+        target.classList.add('active');
+        currentSlide = index;
+      }
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) showSlide(currentSlide - 1);
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      }
+    });
+
+    // Touch swipe support
+    let touchStartX = 0;
+    window.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+    });
+    window.addEventListener('touchend', (e) => {
+      let touchEndX = e.changedTouches[0].clientX;
+      if (touchStartX - touchEndX > 50) nextSlide();
+      if (touchEndX - touchStartX > 50) prevSlide();
+    });
+  </script>
+</body>
+</html>

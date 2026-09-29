@@ -1,0 +1,31 @@
+# Dependencies
+/node_modules
+/vendor
+
+# Large original PDF files (>100MB exceeds GitHub push limit)
+*.pdf
+RateSmart Introduction.pdf
+
+# Temp parsing files
+extract_test.js
+extracted_info.json
+extracted_text.txt
+
+# Environment & local configs
+.env
+.env.backup
+.env.production
+.phpunit.result.cache
+
+# Logs & temp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+.system_generated/
+scratch/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
