@@ -3,10 +3,15 @@
   "version": "1.0.0",
   "description": "RateSmart - Nền tảng Dữ liệu giá & Định giá tự động (AVM)",
   "scripts": {
-    "build": "echo Build successful",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "start": "node server.js"
   },
   "dependencies": {
     "pdf-parse": "^2.4.5"
+  },
+  "devDependencies": {
+    "vite": "^5.4.14"
   }
 }

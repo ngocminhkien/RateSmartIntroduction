@@ -1,6 +1,7 @@
 # Dependencies
 /node_modules
 /vendor
+/dist
 
 # Large original PDF files (>100MB exceeds GitHub push limit)
 *.pdf
